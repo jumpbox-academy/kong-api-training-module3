@@ -1,0 +1,95 @@
+image:
+  repository: kong
+  tag: "3.8"          # IMPORTANT: use 3.4+ so Manager OSS is included
+  pullPolicy: IfNotPresent
+
+enterprise:
+  enabled: false       # stay on pure OSS
+
+postgresql:
+  enabled: false
+
+env:
+  # Traditional mode, DB-backed
+  database: postgres
+  role: "traditional"
+
+  pg_host: kong-pg-rw.kong-trad.svc.cluster.local
+  pg_port: 5432
+  pg_database: kong
+  
+  pg_user:
+    valueFrom:
+      secretKeyRef:
+        name: kong-pg-access
+        key: username
+  pg_password:
+    valueFrom:
+      secretKeyRef:
+        name: kong-pg-access
+        key: password
+
+  # How Manager talks to Admin API (we'll port-forward later)
+  admin_listen: "0.0.0.0:8001"
+  admin_gui_listen: "0.0.0.0:8002"
+  admin_gui_url: "http://localhost:8002"
+  admin_gui_api_url: "http://localhost:8001"
+
+  # Logs
+  proxy_access_log: /dev/stdout
+  admin_access_log: /dev/stdout
+  admin_gui_access_log: /dev/stdout
+  proxy_error_log: /dev/stderr
+  admin_error_log: /dev/stderr
+  admin_gui_error_log: /dev/stderr
+
+proxy:
+  enabled: true
+  type: ClusterIP
+  http:
+    enabled: true
+    servicePort: 80
+  tls:
+    enabled: false
+
+admin:
+  enabled: true
+  type: ClusterIP
+  http:
+    enabled: true
+    servicePort: 8001
+    containerPort: 8001
+  tls:
+    enabled: false
+
+manager:
+  enabled: true
+  type: ClusterIP
+  http:
+    enabled: true
+    servicePort: 8002
+    containerPort: 8002
+  tls:
+    enabled: false
+
+ingressController:
+  enabled: false
+
+migrations:
+  enabled: true
+  env:
+    role: "traditional"
+    database: postgres
+    pg_host: kong-pg-rw.kong-trad.svc.cluster.local
+    pg_port: 5432
+    pg_database: kong
+    pg_user:
+      valueFrom:
+        secretKeyRef:
+          name: kong-pg-access
+          key: username
+    pg_password:
+      valueFrom:
+        secretKeyRef:
+          name: kong-pg-access
+          key: password

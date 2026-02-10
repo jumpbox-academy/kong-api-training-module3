@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  username: a29uZw== # echo -n 'kong' | base64
+  password: bXlwYXNzd29yZHBn # echo -n 'mypasswordpg' | base64
+kind: Secret
+metadata:
+  name: kong-pg-access
+  namespace: kong-trad
+type: kubernetes.io/basic-auth
